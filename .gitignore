@@ -1,0 +1,11 @@
+# IDE
+.vscode/
+.idea/
+
+# ROS 2
+build/
+install/
+log/
+
+# Misc caches
+*.db
