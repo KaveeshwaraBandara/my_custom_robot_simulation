@@ -32,8 +32,8 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(
             os.path.join(get_package_share_directory('ros_gz_sim'), 'launch', 'gz_sim.launch.py')
         ),
-        # Run headless + verbose on the default empty world
-        launch_arguments={'gz_args': '-r -v 3 empty.sdf'}.items()
+        # Run headless + verbose on a minimal world with sensor support
+        launch_arguments={'gz_args': '-r -v 3 worlds/empty_sensor.sdf'}.items()
     )
 
     # Publish TF from your URDF
@@ -53,10 +53,26 @@ def generate_launch_description():
         output='screen'
     )
 
+    bridge_config = os.path.join(pkg_share, 'config', 'bridge.yaml')
+    bridge = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        name='scan_bridge',
+        parameters=[
+            {
+                'config_file': bridge_config,
+                'expand_gz_topic_names': True,
+                'use_sim_time': True,
+            }
+        ],
+        output='screen'
+    )
+
     return LaunchDescription([
         SetEnvironmentVariable('GZ_SIM_RESOURCE_PATH', os.pathsep.join(resource_paths)),
         SetEnvironmentVariable('GAZEBO_MODEL_PATH', os.pathsep.join(model_paths)),
         gz_launch,
         rsp,
         spawn,
+        bridge,
     ])
